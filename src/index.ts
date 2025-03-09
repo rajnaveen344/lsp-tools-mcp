@@ -41,7 +41,7 @@ await Promise.all(args.map(async (dir) => {
 
 // Schema definitions for the find_regex_position tool
 const FindRegexPositionArgsSchema = z.object({
-  path: z.string().describe("Path to the file to search in"),
+  path: z.string().describe("Absolute path to the file to search in. Relative paths are not supported."),
   regex: z.string().describe("Regular expression pattern to search for"),
 });
 
@@ -72,7 +72,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           "Returns an array of matches with their positions. " +
           "Line and column numbers are 0-indexed (first line is 0). " +
           "Each match includes: match (matched text), line (starting line), column (starting column), " +
-          "endLine (ending line), and endColumn (ending column, exclusive).",
+          "endLine (ending line), and endColumn (ending column, exclusive). " +
+          "IMPORTANT: The path parameter must be an absolute path. Relative paths are not supported.",
         inputSchema: zodToJsonSchema(FindRegexPositionArgsSchema),
       },
       {
@@ -104,7 +105,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const positions = await findRegexPositionsInFile(validatedPath, parsed.regex);
 
         return {
-          result: positions,
+          content: [{
+            type: 'text',
+            text: JSON.stringify(positions),
+          }]
         };
       } catch (error) {
         return {
@@ -115,7 +119,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     case "list_allowed_directories": {
       return {
-        result: allowedDirectories,
+        content: [{
+          type: 'text',
+          text: JSON.stringify(allowedDirectories),
+        }]
       };
     }
 
