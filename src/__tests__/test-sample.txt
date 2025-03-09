@@ -1,0 +1,13 @@
+This is a sample text file.
+It contains several lines.
+Some with pattern123 to test.
+And another pattern456 on this line.
+These patterns appear at different positions.
+
+There's also a pattern789 at the beginning of this line.
+And a multiline pattern
+that spans
+across
+multiple lines.
+
+The end.
