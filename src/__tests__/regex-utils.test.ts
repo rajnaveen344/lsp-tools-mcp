@@ -77,9 +77,62 @@ describe("Regex Utilities", () => {
     it("should find patterns in a file", async () => {
       const result = await findRegexPositionsInFile(testFilePath, "pattern[0-9]+");
 
-      expect(result.length).toBeGreaterThan(0);
-      expect(result.some(match => match.match === "pattern123")).toBe(true);
-      expect(result.some(match => match.match === "pattern456")).toBe(true);
+      // Verify we found all three patterns
+      expect(result.length).toBe(3);
+
+      // Find the matches by their text content
+      const pattern123Match = result.find(match => match.match === "pattern123");
+      const pattern456Match = result.find(match => match.match === "pattern456");
+      const pattern789Match = result.find(match => match.match === "pattern789");
+
+      // Verify each match exists
+      expect(pattern123Match).toBeDefined();
+      expect(pattern456Match).toBeDefined();
+      expect(pattern789Match).toBeDefined();
+
+      // Verify positions for pattern123 (line 2: "Some with pattern123 to test.")
+      expect(pattern123Match).toEqual({
+        match: "pattern123",
+        line: 2,
+        column: 10,
+        endLine: 2,
+        endColumn: 20
+      });
+
+      // Verify positions for pattern456 (line 3: "And another pattern456 on this line.")
+      expect(pattern456Match).toEqual({
+        match: "pattern456",
+        line: 3,
+        column: 12,
+        endLine: 3,
+        endColumn: 22
+      });
+
+      // Verify positions for pattern789 (line 6: "There's also a pattern789 at the beginning of this line.")
+      expect(pattern789Match).toEqual({
+        match: "pattern789",
+        line: 6,
+        column: 15,
+        endLine: 6,
+        endColumn: 25
+      });
+    });
+
+    it("should find multiline patterns in a file", async () => {
+      const result = await findRegexPositionsInFile(
+        testFilePath,
+        "multiline pattern\\nthat spans"
+      );
+
+      expect(result.length).toBe(1);
+
+      // Verify positions for the multiline pattern
+      const multilineMatch = result[0];
+      expect(multilineMatch.match).toBe("multiline pattern\nthat spans");
+      expect(multilineMatch.line).toBe(7);  // Line index of "And a multiline pattern"
+      expect(multilineMatch.column).toBe(6); // Column index where "multiline pattern" starts (after "And a ")
+      expect(multilineMatch.endLine).toBe(8); // Line index of "that spans"
+      expect(multilineMatch.endColumn).toBe(10); // Column index where "that spans" ends
     });
 
     it("should throw an error for non-existent file", async () => {
